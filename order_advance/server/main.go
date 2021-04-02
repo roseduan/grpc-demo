@@ -36,7 +36,10 @@ func main() {
 	}
 
 	// 注册拦截器
-	s := grpc.NewServer(grpc.UnaryInterceptor(orderUnaryServerInterceptor))
+	s := grpc.NewServer(
+		grpc.UnaryInterceptor(orderUnaryServerInterceptor),
+		grpc.StreamInterceptor(orderStreamServerInterceptor),
+	)
 	order.RegisterOrderManagementServer(s, server)
 	log.Println("start gRPC listen on port " + port)
 	if err := s.Serve(listener); err != nil {

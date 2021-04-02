@@ -8,25 +8,60 @@ import (
 	"grpc-demo/order"
 	"io"
 	"log"
+	"sync"
+	"time"
 )
 
 const address = "localhost:50051"
 
 func main() {
-	conn, err := grpc.Dial(address, grpc.WithInsecure())
+	conn, err := grpc.Dial(address,
+		grpc.WithInsecure(),
+		grpc.WithUnaryInterceptor(UnaryClientOrderInterceptor), //注册拦截器
+		grpc.WithStreamInterceptor(StreamClientOrderInterceptor),
+	)
 	if err != nil {
 		log.Println("did not connect.", err)
 		return
 	}
 	defer conn.Close()
 
-	ctx := context.Background()
+	// 使用带有截止时间的context
+	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(5*time.Second)) //适当调整截止时间观察不同的调用效果
+	defer cancel()
+
 	client := order.NewOrderManagementClient(conn)
+	AddOrder(ctx, client)
 
-	fmt.Println("----------------unary rpc----------------")
-	id := AddOrder(ctx, client)
-	GetOrder(ctx, client, id)
+	//fmt.Println("----------------unary rpc----------------")
+	//id := AddOrder(ctx, client)
+	//GetOrder(ctx, client, id)
 
+	fmt.Println("----------request with deadline----------")
+	chn := make(chan string)
+	var wg sync.WaitGroup
+	wg.Add(2)
+	go func() {
+		defer func() {
+			fmt.Println("添加订单成功")
+			wg.Done()
+		}()
+		id := AddOrder(ctx, client)
+		time.Sleep(1 * time.Second)
+		chn <- id
+	}()
+	go func() {
+		id := <-chn
+		time.Sleep(2 * time.Second)
+		GetOrder(ctx, client, id)
+		wg.Done()
+	}()
+	wg.Wait()
+
+	fmt.Println("-----------cancel rpc request------------")
+	cancelRpcRequest(client)
+
+	ctx = context.Background()
 	fmt.Println("-----------server stream rpc-------------")
 	SearchOrder(ctx, client)
 
@@ -144,4 +179,27 @@ func processResultFromServer(stream order.OrderManagement_ProcessOrderClient, ch
 		}
 		log.Printf("[client]server process result : %+v\n", shipment)
 	}
+}
+
+// 取消RPC请求
+func cancelRpcRequest(client order.OrderManagementClient) {
+	ctx, cancelFunc := context.WithCancel(context.Background())
+	done := make(chan string)
+	go func() {
+		var id string
+		defer func() {
+			fmt.Println("结束执行, id = ", id)
+			done <- id
+		}()
+
+		time.Sleep(2 * time.Second)
+		id = AddOrder(ctx, client)
+		log.Println("添加订单成功, id = ", id)
+	}()
+
+	//等待一秒后取消
+	time.Sleep(time.Second)
+	cancelFunc()
+
+	<-done
 }
