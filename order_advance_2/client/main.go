@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"github.com/golang/protobuf/ptypes/wrappers"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 	order "grpc-demo/order_advance_2"
 	"io"
 	"log"
+	"time"
 )
 
 const address = "localhost:50051"
@@ -19,10 +21,25 @@ func main() {
 		return
 	}
 	defer conn.Close()
-
-	ctx := context.Background()
 	client := order.NewOrderManagementClient(conn)
 
+	md := metadata.Pairs(
+		"timestamp", time.Now().Format(time.RFC3339),
+		"test-key", "val1",
+		"test-key", "val2",
+	)
+	//使用元数据context
+	mdCtx := metadata.NewOutgoingContext(context.Background(), md)
+	fmt.Println("----------------use metadata----------------")
+	testOrder := &order.Order{Destination: "beijing", Items: []string{"book1", "book2"}, Price: 123.232}
+
+	//接收从服务端发送过来的metadata信息
+	var header metadata.MD
+
+	_, err = client.AddOrder(mdCtx, testOrder, grpc.Header(&header))
+	log.Printf("metadata from server : %+v\n", header)
+
+	ctx := context.Background()
 	fmt.Println("----------------unary rpc----------------")
 	id := AddOrder(ctx, client)
 	GetOrder(ctx, client, id)

@@ -1,0 +1,17 @@
+syntax = "proto3";
+package order;
+
+import "google/protobuf/wrappers.proto";
+
+service EchoService {
+  rpc unaryEcho(echoReq) returns(echoResp);
+}
+
+message echoReq {
+  string message = 1;
+}
+
+message echoResp {
+  string message = 1;
+  string addr = 2;
+}

@@ -1,9 +1,7 @@
 package main
 
 import (
-	"context"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/metadata"
 	order "grpc-demo/order_advance_2"
 	"log"
 	"net"
@@ -41,9 +39,4 @@ func main() {
 		log.Println("failed to serve...", err)
 		return
 	}
-}
-
-// 测试创建并传递元数据
-func sendMetadata() {
-	metadata.FromOutgoingContext(context.Background())
 }

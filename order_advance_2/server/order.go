@@ -4,12 +4,15 @@ import (
 	"context"
 	"github.com/gofrs/uuid"
 	"github.com/golang/protobuf/ptypes/wrappers"
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	order "grpc-demo/order_advance_2"
 	"io"
 	"log"
 	"strings"
+	"time"
 )
 
 type OrderServer struct {
@@ -44,6 +47,20 @@ func (s *OrderServer) AddOrder(ctx context.Context, req *order.Order) (resp *wra
 	s.orderMap[id] = req
 
 	resp.Value = id
+
+	//获取元数据
+	if md, ok := metadata.FromIncomingContext(ctx); !ok {
+		log.Println("failed to get metadata")
+	} else {
+		log.Printf("metadata from client : %+v\n", md)
+	}
+
+	//发送一个header元信息
+	md := metadata.New(map[string]string{"location": "San Jose", "timestamp": time.Now().Format(time.StampNano)})
+	err = grpc.SendHeader(ctx, md)
+	if err != nil {
+		log.Println("send header err")
+	}
 	return
 }
 
@@ -119,4 +136,3 @@ func (s *OrderServer) ProcessOrder(stream order.OrderManagement_ProcessOrderServ
 	}
 	return
 }
-
