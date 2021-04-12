@@ -1,0 +1,8 @@
+syntax = "proto3";
+package load_balance_demo;
+
+import "google/protobuf/wrappers.proto";
+
+service EchoService {
+  rpc SayHello(google.protobuf.StringValue) returns(google.protobuf.StringValue);
+}
