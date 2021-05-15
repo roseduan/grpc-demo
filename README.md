@@ -20,13 +20,13 @@
 
 推荐这本《gRPC 与云原生应用开发》：
 
-![Xnip2021-05-15_09-22-32.png](https://i.loli.net/2021/05/15/mwMvbTGNj28YXnZ.png)
+![](https://github.com/roseduan/grpc-demo/blob/main/img/book_douban.png)
 
 如果没有实体书，可在公众号领取电子书，中文和英文的都有：
 
-![Xnip2021-05-15_09-26-23.png](https://i.loli.net/2021/05/15/KnU2riEDI4JvLFd.png)
+![](https://github.com/roseduan/grpc-demo/blob/main/img/book.png)
 
-领取方式：关注之后回复 **gRPC** 即可。
+领取方式：关注公众号【roseduan写字的地方】，或扫描下面的二维码，回复 **gRPC** 即可。
 
-![Xnip2021-05-15_09-33-23.png](https://i.loli.net/2021/05/15/c5dfsLJ41vZ6iRz.png)
+![](https://github.com/roseduan/grpc-demo/blob/main/img/wechat.png)
 
