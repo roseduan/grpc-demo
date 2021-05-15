@@ -1,0 +1,19 @@
+syntax = "proto3";
+package product;
+
+service ProductInfo {
+  //添加商品
+  rpc addProduct(Product) returns (ProductId);
+  //获取商品
+  rpc getProduct(ProductId) returns (Product);
+}
+
+message Product {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+}
+
+message ProductId {
+  string value = 1;
+}
